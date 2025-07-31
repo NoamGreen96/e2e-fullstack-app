@@ -1,4 +1,5 @@
 const { Kafka } = require('kafkajs');
+const logger = require('../utils/logger');
 
 const kafka = new Kafka({
   clientId: 'my-consumer',
@@ -9,10 +10,12 @@ const consumer = kafka.consumer({ groupId: 'user-logins-group' });
 
 const runConsumer = async () => {
   try {
-    console.log('Connecting Kafka Consumer...');
+    logger.info('Connecting Kafka Consumer...');
+
     await consumer.connect();
     await consumer.subscribe({ topic: 'user-logins', fromBeginning: true });
-    console.log('Kafka Consumer connected and listening...');
+
+    logger.info('Kafka Consumer connected and listening...');
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
@@ -27,12 +30,12 @@ const runConsumer = async () => {
       },
     });
   } catch (error) {
-    console.error('Error in Kafka Consumer:', error);
+    logger.error('Error in Kafka Consumer:', error);
   }
 };
 
 process.on('SIGINT', async () => {
-  console.log('Disconnecting Kafka consumer...');
+  logger.info('Disconnecting Kafka consumer...');
   await consumer.disconnect();
   process.exit(0);
 });
