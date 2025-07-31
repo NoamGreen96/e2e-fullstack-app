@@ -1,18 +1,42 @@
+import React, { useState } from 'react';
+
 function App() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [msg, setMsg] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const res = await fetch('http://localhost:4000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setMsg(`Success: ${data.message}`);
+    } else {
+      setMsg(`Error: ${data.message}`);
+    }
+  };
+
   return (
-    <div >
-      <h1>Login</h1>
-      <form>
+    <div style={{ padding: '2rem' }}>
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
         <div>
           <label>Username:</label>
-          <input type="text" name="username" />
+          <input value={username} onChange={(e) => setUsername(e.target.value)} />
         </div>
-        <div style={{ marginTop: '1rem' }}>
+        <div>
           <label>Password:</label>
-          <input type="password" name="password" />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         <button type="submit" style={{ marginTop: '1rem' }}>Login</button>
       </form>
+      <p>{msg}</p>
     </div>
   );
 }
