@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path')
-const { connectProducer } = require('../kafka/producer');
+const { connectProducer, sendLoginLog } = require('../kafka/producer');
+const { runConsumer } = require('../kafka/consumer');
 const authRoutes = require('./routes/auth');
 require('dotenv').config();
 
@@ -12,8 +13,18 @@ app.use(cors());
 app.use(express.json());
 app.use('/api', authRoutes);
 
-connectProducer();
+const run = async () => {
+  await connectProducer();
+  await runConsumer();
 
+  await sendLoginLog({
+    username: 'admin',
+    timestamp: new Date().toISOString(),
+    success: true,
+  });
+};
+
+run();
 app.listen(PORT, () => {
   console.log(`Server run on: http://localhost:${PORT}/`);
 });
